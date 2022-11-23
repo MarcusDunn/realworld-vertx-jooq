@@ -107,7 +107,7 @@ tasks.withType<JooqGenerate>() {
 
 pitest {
     excludedClasses.set(listOf("*_*Factory", "*Module", "*Dagger*_*"))
-    threads.set(24)
+    threads.set(Runtime.getRuntime().availableProcessors())
     outputFormats.set(listOf("HTML"))
     junit5PluginVersion.set("1.0.0")
 }
