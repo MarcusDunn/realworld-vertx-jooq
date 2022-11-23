@@ -5,16 +5,22 @@ import dagger.Provides;
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
+import javax.inject.Singleton;
+import org.apache.commons.configuration2.Configuration;
+
+import static io.r2dbc.spi.ConnectionFactoryOptions.PASSWORD;
+import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
 
 @Module
 public class DatabaseModule {
     @Provides
-    ConnectionFactory connectionFactory() {
+    @Singleton
+    static ConnectionFactory connectionFactory(Configuration configuration) {
         return ConnectionFactories.get(ConnectionFactoryOptions
-                .parse("r2dbc:postgresql://localhost:5432/realworld")
+                .parse(configuration.getString("R2DBC_URL", "r2dbc:postgresql://localhost:5432/realworld"))
                 .mutate()
-                .option(ConnectionFactoryOptions.USER, "realworld")
-                .option(ConnectionFactoryOptions.PASSWORD, "realworld")
+                .option(USER, configuration.getString("DATABASE_USER", "realworld"))
+                .option(PASSWORD, configuration.getString("DATABASE_PASSWORD", "realworld"))
                 .build()
         );
     }

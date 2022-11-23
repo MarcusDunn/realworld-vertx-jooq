@@ -2,10 +2,11 @@ package io.github.marcusdunn.user.login;
 
 import io.github.marcusdunn.AbstractDatabaseTest;
 import io.github.marcusdunn.ReactiveFutureBridge;
+import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import java.util.concurrent.TimeUnit;
 import org.jooq.generated.tables.JUser;
-import org.jooq.impl.DSL;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -13,8 +14,8 @@ import static org.jooq.impl.DSL.value;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(VertxExtension.class)
-class LoginServiceImplTest extends AbstractDatabaseTest {
-    final LoginService loginService = new LoginServiceImpl(connectionFactory);
+@Timeout(value = 2, timeUnit = TimeUnit.SECONDS)
+class LoginServiceTest extends AbstractDatabaseTest {
 
     @Test
     void checkLoginWithNoMatchingUser(VertxTestContext testContext) {
@@ -36,8 +37,7 @@ class LoginServiceImplTest extends AbstractDatabaseTest {
     @Test
     void checkLoginWithMatchingUser(VertxTestContext testContext) {
         ReactiveFutureBridge.fetchOne(
-                        DSL.using(connectionFactory)
-                                .insertInto(
+                        dsl.insertInto(
                                         JUser.USER,
                                         JUser.USER.EMAIL,
                                         JUser.USER.PASSWORD

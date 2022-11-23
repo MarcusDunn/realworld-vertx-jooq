@@ -7,6 +7,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.handler.AuthenticationHandler;
+import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.ext.web.openapi.RouterBuilderOptions;
 import java.util.Set;
@@ -19,19 +20,23 @@ public class Main {
     private final static Logger logger = Logger.getLogger(Main.class.getName());
     private final Vertx vertx;
     private final Set<OperationHandler> operationHandlers;
+    private final BodyHandler bodyHandler;
     private final AuthenticationHandler authenticationHandler;
     private final HttpServerOptions httpServerOptions;
     private final RouterBuilderOptions routerBuilderOptions;
 
     @Inject
-    public Main(Vertx vertx,
-                Set<OperationHandler> operationHandlers,
-                AuthenticationHandler authenticationHandler,
-                HttpServerOptions httpServerOptions,
-                RouterBuilderOptions routerBuilderOptions
+    public Main(
+            Vertx vertx,
+            Set<OperationHandler> operationHandlers,
+            BodyHandler bodyHandler,
+            AuthenticationHandler authenticationHandler,
+            HttpServerOptions httpServerOptions,
+            RouterBuilderOptions routerBuilderOptions
     ) {
         this.vertx = vertx;
         this.operationHandlers = operationHandlers;
+        this.bodyHandler = bodyHandler;
         this.authenticationHandler = authenticationHandler;
         this.httpServerOptions = httpServerOptions;
         this.routerBuilderOptions = routerBuilderOptions;
@@ -50,7 +55,7 @@ public class Main {
 
     public Future<HttpServer> run() {
         return RouterBuilder
-                .create(vertx, "src/main/resources/openapi.yml")
+                .create(vertx, "openapi.yml")
                 .flatMap(builder -> {
                     builder.setOptions(routerBuilderOptions);
                     operationHandlers.forEach(operationHandler -> {
@@ -58,6 +63,7 @@ public class Main {
                         logger.fine(() -> "Registering " + operationName);
                         builder.operation(operationName).handler(operationHandler.handler());
                     });
+                    builder.rootHandler(bodyHandler);
                     logger.fine(() -> "Registering Security handler Token");
                     builder.securityHandler("Token", authenticationHandler);
                     logger.fine(() -> "Creating httpServer");
@@ -69,7 +75,7 @@ public class Main {
                 }).onFailure(t -> logger.log(Level.SEVERE, "Failed to create a routerBuilder from openapi spec.", t));
     }
 
-    @Component(modules = {VertxModule.class, UserModule.class})
+    @Component(modules = {VertxModule.class, UserModule.class, DatabaseModule.class, ConfigModule.class})
     @Singleton
     interface RealWorld {
         Main main();

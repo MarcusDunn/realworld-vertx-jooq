@@ -5,6 +5,7 @@ import org.jooq.meta.jaxb.Strategy
 plugins {
     id("java")
     id("nu.studer.jooq") version "8.0"
+    id("info.solidsoft.pitest") version "1.9.0"
     application
 }
 
@@ -28,6 +29,7 @@ dependencies {
 
     // dagger
     annotationProcessor("com.google.dagger:dagger-compiler:2.44.2")
+    testAnnotationProcessor("com.google.dagger:dagger-compiler:2.44.2")
     implementation("com.google.dagger:dagger:2.44.2")
 
     // postgres driver
@@ -42,9 +44,9 @@ dependencies {
     implementation("io.vertx:vertx-auth-jwt:4.3.5")
     implementation("io.vertx:vertx-web-openapi:4.3.5")
     implementation("io.vertx:vertx-reactive-streams:4.3.5")
-    testImplementation("io.vertx:vertx-web-client:4.3.5")
+    implementation("io.vertx:vertx-web-client:4.3.5")
     testImplementation("io.vertx:vertx-junit5:4.3.5")
-    testImplementation("io.vertx:vertx-junit5-web-client:4.0.0-milestone4")
+    testImplementation("org.hamcrest:java-hamcrest:2.0.0.0")
 
     // reactor
     implementation("io.projectreactor:reactor-core:3.5.0")
@@ -59,6 +61,9 @@ dependencies {
     // junit
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.1")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.1")
+
+    // config
+    implementation("org.apache.commons:commons-configuration2:2.8.0")
 }
 
 tasks.withType<Test> {
@@ -98,4 +103,11 @@ sourceSets {
 
 tasks.withType<JooqGenerate>() {
     allInputsDeclared.set(true)
+}
+
+pitest {
+    excludedClasses.set(listOf("*_*Factory", "*Module", "*Dagger*_*"))
+    threads.set(24)
+    outputFormats.set(listOf("HTML"))
+    junit5PluginVersion.set("1.0.0")
 }

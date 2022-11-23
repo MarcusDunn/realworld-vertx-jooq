@@ -17,7 +17,6 @@ public class ReactiveFutureBridge {
         publisher.subscribe(s);
         return s.getFuture();
     }
-
     private static class FutureSubscriber<T> implements Flow.Subscriber<T>, Subscriber<T> {
         private final Promise<Optional<T>> promise;
 

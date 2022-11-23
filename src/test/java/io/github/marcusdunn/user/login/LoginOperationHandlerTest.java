@@ -1,64 +1,107 @@
 package io.github.marcusdunn.user.login;
 
 import io.github.marcusdunn.AbstractDatabaseTest;
-import io.github.marcusdunn.OperationHandler;
-import io.vertx.core.Vertx;
+import io.vertx.core.CompositeFuture;
+import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.Router;
-import io.vertx.ext.web.client.WebClient;
-import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import java.util.concurrent.TimeUnit;
+import org.jooq.generated.tables.JUser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import static io.github.marcusdunn.BodyMatcher.hasBody;
+import static io.github.marcusdunn.JsonBodyMatcher.withJsonObject;
+import static io.github.marcusdunn.JsonStringFieldMatcher.hasStringField;
+import static io.github.marcusdunn.ReactiveFutureBridge.fetchOne;
+import static io.github.marcusdunn.StatusCodeMatcher.hasStatusCode;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jooq.impl.DSL.value;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(VertxExtension.class)
+@Timeout(value = 2, timeUnit = TimeUnit.SECONDS)
 class LoginOperationHandlerTest extends AbstractDatabaseTest {
-    final OperationHandler loginOperationHandler = new LoginOperationHandler(new LoginServiceImpl(connectionFactory));
 
     @Test
-    void testLoginWithNoSuchUser(Vertx vertx, VertxTestContext vertxTestContext) {
-        final var router = Router.router(vertx);
-        router
-                .route("/")
-                .handler(BodyHandler.create())
-                .handler(loginOperationHandler.handler());
-        vertx.createHttpServer()
-                .requestHandler(router)
-                .listen(0, vertxTestContext.succeeding((server) -> WebClient.create(vertx)
-                        .get("/")
-                        .port(server.actualPort())
-                        .host("localhost")
-                        .sendBuffer(
-                                new JsonObject()
-                                        .put("email", "marcus.s.dunn@example.com")
-                                        .put("password", "password")
-                                        .toBuffer()
-                        ).onComplete(vertxTestContext.succeeding((response) -> {
+    void testLoginWithNoSuchUser(VertxTestContext vertxTestContext) {
+        main.run().onComplete(vertxTestContext.succeeding(server -> webClient
+                .post("/users/login")
+                .port(server.actualPort())
+                .host("localhost")
+                .sendJsonObject(JsonObject.of(
+                        "user", JsonObject.of(
+                                "email", "marcus@example.com",
+                                "password", "password123"
+                        ))
+                )
+                .onComplete(vertxTestContext.succeeding(response -> {
                             vertxTestContext.verify(() -> assertEquals(401, response.statusCode()));
-                            vertxTestContext.completeNow();
-                        }))));
+                            server.close().onComplete(vertxTestContext.succeedingThenComplete());
+                        }
+                ))));
     }
 
     @Test
-    void testLoginWithNoBody(Vertx vertx, VertxTestContext vertxTestContext) {
-        final var router = Router.router(vertx);
-        router
-                .route("/")
-                .handler(BodyHandler.create())
-                .handler(loginOperationHandler.handler());
-        vertx.createHttpServer()
-                .requestHandler(router)
-                .listen(0, vertxTestContext.succeeding((server) -> WebClient.create(vertx)
-                        .get("/")
-                        .port(server.actualPort())
-                        .host("localhost")
-                        .send()
-                        .onComplete(vertxTestContext.succeeding((response) -> {
-                            vertxTestContext.verify(() -> assertEquals(400, response.statusCode()));
-                            vertxTestContext.completeNow();
-                        }))));
+    void testLoginWithNoBody(VertxTestContext vertxTestContext) {
+        main.run().onComplete(vertxTestContext.succeeding(server -> webClient
+                .post("/users/login")
+                .port(server.actualPort())
+                .host("localhost")
+                .send()
+                .onComplete(vertxTestContext.succeeding((response) -> {
+                    vertxTestContext.verify(() -> assertEquals(400, response.statusCode()));
+                    server.close().onComplete(vertxTestContext.succeedingThenComplete());
+                }))));
+    }
+
+    @Test
+    void testLoginWithActualUser(VertxTestContext vertxTestContext) {
+        final String email = "marcus@example.com";
+        final String password = "password";
+        CompositeFuture.all(
+                        fetchOne(dsl
+                                .insertInto(JUser.USER,
+                                        JUser.USER.EMAIL,
+                                        JUser.USER.PASSWORD
+                                )
+                                .values(
+                                        value(email, JUser.USER.EMAIL),
+                                        value(password, JUser.USER.PASSWORD)
+                                )),
+                        main.run()
+                )
+                .map(result -> result.<HttpServer>resultAt(1))
+                .onComplete(vertxTestContext.succeeding(server ->
+                        webClient
+                                .post("/users/login")
+                                .port(server.actualPort())
+                                .host("localhost")
+                                .sendJsonObject(JsonObject.of(
+                                        "user", JsonObject.of(
+                                                "email", email,
+                                                "password", password
+                                        ))
+                                )
+                                .onComplete(vertxTestContext.succeeding((response) -> {
+                                    vertxTestContext.verify(() -> assertThat(response, hasStatusCode(equalTo(200))));
+                                    vertxTestContext.verify(() -> assertThat(response, hasBody(withJsonObject(
+                                            allOf(
+                                                    hasStringField("email", equalTo(email)),
+                                                    hasStringField("username", equalTo(email)),
+                                                    hasStringField("token", notNullValue()),
+                                                    hasStringField("image", nullValue()),
+                                                    hasStringField("bio", nullValue())
+                                            )
+                                    ))));
+                                    server.close().onComplete(vertxTestContext.succeedingThenComplete());
+                                }))
+                ));
     }
 }

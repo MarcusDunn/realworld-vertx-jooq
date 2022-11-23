@@ -4,10 +4,9 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.multibindings.IntoSet;
 import io.github.marcusdunn.OperationHandler;
-import io.github.marcusdunn.user.login.LoginModule;
 import io.github.marcusdunn.user.login.LoginOperationHandler;
 
-@Module(includes = {LoginModule.class})
+@Module
 public abstract class UserModule {
     @IntoSet
     @Binds

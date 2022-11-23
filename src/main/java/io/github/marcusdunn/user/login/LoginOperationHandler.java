@@ -3,7 +3,11 @@ package io.github.marcusdunn.user.login;
 import io.github.marcusdunn.OperationHandler;
 import io.github.marcusdunn.user.UserDto;
 import io.vertx.core.Handler;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.validation.RequestParameters;
+import io.vertx.ext.web.validation.ValidationHandler;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -13,46 +17,23 @@ import javax.inject.Inject;
 public class LoginOperationHandler implements OperationHandler {
     private static final Logger logger = Logger.getLogger(LoginOperationHandler.class.getName());
     private final LoginService loginService;
+    private final JWTAuth jwtAuth;
 
     @Inject
-    public LoginOperationHandler(LoginService loginService) {
+    public LoginOperationHandler(LoginService loginService, JWTAuth jwtAuth) {
         this.loginService = loginService;
+        this.jwtAuth = jwtAuth;
     }
 
-    private static Request extractRequest(RoutingContext routingContext) {
-        final var jsonObject = routingContext
+    private static Request getRequest(RoutingContext routingContext) {
+        RequestParameters parameters = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
+        JsonObject jsonObject = parameters
                 .body()
-                .asJsonObject();
-        if (jsonObject == null) {
-            logger.finer("Json object was null");
-            routingContext
-                    .response()
-                    .setStatusCode(422)
-                    .end();
-            return null;
-        }
-        logger.finest("Extracted: " + jsonObject);
-        final var email = jsonObject.getString("email");
-        if (email == null) {
-            logger.finer("Email was null");
-            routingContext
-                    .response()
-                    .setStatusCode(422)
-                    .end();
-            return null;
-        }
-        logger.finest("Extracted email: " + email);
-        final var password = jsonObject.getString("password");
-        if (password == null) {
-            logger.finer("Password was null");
-            routingContext
-                    .response()
-                    .setStatusCode(422)
-                    .end();
-            return null;
-        }
-        logger.finest("Extracted password");
-        return new Request(email, password);
+                .getJsonObject()
+                .getJsonObject("user");
+        String email = jsonObject.getString("email");
+        String password = jsonObject.getString("password");
+        return new Request(new Request.User(email, password));
     }
 
     @Override
@@ -66,11 +47,10 @@ public class LoginOperationHandler implements OperationHandler {
     }
 
     private void handle(RoutingContext routingContext) {
-        final Request request = extractRequest(routingContext);
-        if (request == null) return;
+        Request request = getRequest(routingContext);
 
         loginService
-                .loginEmailPassword(request.email, request.password)
+                .loginEmailPassword(request.user.email, request.user.password)
                 .onSuccess(userRecordOptional -> {
                     if (userRecordOptional.isPresent()) {
                         final var user = userRecordOptional.get();
@@ -78,7 +58,11 @@ public class LoginOperationHandler implements OperationHandler {
                         routingContext
                                 .response()
                                 .setStatusCode(200)
-                                .end(new UserDto(user).toJsonBuffer());
+                                .end(new UserDto(
+                                                user,
+                                                jwtAuth.generateToken(JsonObject.of("email", user.getEmail()))
+                                        ).toJsonBuffer()
+                                );
                     } else {
                         logger.finer("No user was found");
                         routingContext
@@ -97,10 +81,16 @@ public class LoginOperationHandler implements OperationHandler {
     /**
      * see <a href="https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#authentication">Authentication</a>
      */
-    private record Request(String email, String password) {
-        Request(String email, String password) {
-            this.email = Objects.requireNonNull(email, "email");
-            this.password = Objects.requireNonNull(password, "password");
+    private record Request(User user) {
+        Request(User user) {
+            this.user = Objects.requireNonNull(user);
+        }
+
+        private record User(String email, String password) {
+            User(String email, String password) {
+                this.email = Objects.requireNonNull(email, "email");
+                this.password = Objects.requireNonNull(password, "password");
+            }
         }
     }
 }
