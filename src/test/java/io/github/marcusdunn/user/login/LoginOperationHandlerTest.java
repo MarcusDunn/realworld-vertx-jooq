@@ -12,11 +12,11 @@ import org.jooq.generated.tables.JUser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import static io.github.marcusdunn.BodyMatcher.hasBody;
-import static io.github.marcusdunn.JsonBodyMatcher.withJsonObject;
-import static io.github.marcusdunn.JsonStringFieldMatcher.hasStringField;
+import static io.github.marcusdunn.matcher.BodyMatcher.hasBody;
+import static io.github.marcusdunn.matcher.JsonBodyMatcher.withJsonObject;
+import static io.github.marcusdunn.matcher.JsonStringFieldMatcher.hasStringField;
 import static io.github.marcusdunn.ReactiveFutureBridge.fetchOne;
-import static io.github.marcusdunn.StatusCodeMatcher.hasStatusCode;
+import static io.github.marcusdunn.matcher.StatusCodeMatcher.hasStatusCode;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;

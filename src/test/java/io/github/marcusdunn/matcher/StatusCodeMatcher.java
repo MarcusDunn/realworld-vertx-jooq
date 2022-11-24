@@ -1,4 +1,4 @@
-package io.github.marcusdunn;
+package io.github.marcusdunn.matcher;
 
 import io.vertx.ext.web.client.HttpResponse;
 import org.hamcrest.FeatureMatcher;

@@ -46,7 +46,10 @@ dependencies {
     implementation("io.vertx:vertx-reactive-streams:4.3.5")
     implementation("io.vertx:vertx-web-client:4.3.5")
     testImplementation("io.vertx:vertx-junit5:4.3.5")
+
+    // testing
     testImplementation("org.hamcrest:java-hamcrest:2.0.0.0")
+    testImplementation("com.approvaltests:approvaltests:18.5.0")
 
     // reactor
     implementation("io.projectreactor:reactor-core:3.5.0")
@@ -74,15 +77,8 @@ jooq {
     configurations {
         create("Main") {
             jooqConfiguration.apply {
-                jdbc.apply {
-                    driver = "org.postgresql.Driver"
-                    url = "jdbc:postgresql://localhost:5432/realworld"
-                    user = "realworld"
-                    password = "realworld"
-                }
                 generator.apply {
                     strategy = Strategy().withName("org.jooq.codegen.example.JPrefixGeneratorStrategy")
-
                     database.apply {
                         name = "org.jooq.meta.extensions.liquibase.LiquibaseDatabase"
                         properties.add(Property().withKey("scripts").withValue("dbchangelog.xml"))
@@ -102,6 +98,7 @@ sourceSets {
 }
 
 tasks.withType<JooqGenerate>() {
+    inputs.files("dbchangelog.xml")
     allInputsDeclared.set(true)
 }
 

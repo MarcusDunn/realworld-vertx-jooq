@@ -1,4 +1,4 @@
-package io.github.marcusdunn;
+package io.github.marcusdunn.matcher;
 
 import io.vertx.core.json.JsonObject;
 import org.hamcrest.FeatureMatcher;
