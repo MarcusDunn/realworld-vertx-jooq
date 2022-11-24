@@ -66,15 +66,18 @@ class LoginOperationHandlerTest extends AbstractDatabaseTest {
     void testLoginWithActualUser(VertxTestContext vertxTestContext) {
         final String email = "marcus@example.com";
         final String password = "password";
+        final String username = "frosty";
         CompositeFuture.all(
                         fetchOne(dsl
                                 .insertInto(JUser.USER,
                                         JUser.USER.EMAIL,
-                                        JUser.USER.PASSWORD
+                                        JUser.USER.PASSWORD,
+                                        JUser.USER.USERNAME
                                 )
                                 .values(
                                         value(email, JUser.USER.EMAIL),
-                                        value(password, JUser.USER.PASSWORD)
+                                        value(password, JUser.USER.PASSWORD),
+                                        value(username, JUser.USER.USERNAME)
                                 )),
                         main.run()
                 )
@@ -95,7 +98,7 @@ class LoginOperationHandlerTest extends AbstractDatabaseTest {
                                             hasStatusCode(equalTo(200)),
                                             hasBody(withJsonObject(allOf(
                                                     hasStringField("email", equalTo(email)),
-                                                    hasStringField("username", equalTo(email)),
+                                                    hasStringField("username", equalTo(username)),
                                                     hasStringField("token", notNullValue()),
                                                     hasStringField("image", nullValue()),
                                                     hasStringField("bio", nullValue()))

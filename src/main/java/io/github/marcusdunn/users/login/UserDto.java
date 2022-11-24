@@ -10,7 +10,7 @@ import org.jooq.generated.tables.records.JUserRecord;
 public record UserDto(String email, String token, String username, String bio, String image) {
 
     public UserDto(JUserRecord user, String jwt) {
-        this(user.getEmail(), jwt, user.getEmail(), null, null);
+        this(user.getEmail(), jwt, user.getUsername(), null, null);
     }
 
     public Buffer toJsonBuffer() {

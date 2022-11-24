@@ -8,10 +8,9 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.validation.RequestParameters;
 import io.vertx.ext.web.validation.ValidationHandler;
 
-import java.util.Objects;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.inject.Inject;
+import java.util.Objects;
+import java.util.logging.Logger;
 
 
 public class LoginOperationHandler implements OperationHandler {
@@ -44,31 +43,23 @@ public class LoginOperationHandler implements OperationHandler {
 
         loginService
                 .loginEmailPassword(request.user.email, request.user.password)
-                .onSuccess(userRecordOptional -> {
-                    if (userRecordOptional.isPresent()) {
-                        final var user = userRecordOptional.get();
-                        logger.finest("Found " + user);
-                        routingContext
-                                .response()
-                                .setStatusCode(200)
-                                .end(new UserDto(
-                                                user,
-                                                jwtAuth.generateToken(JsonObject.of("email", user.getEmail()))
-                                        ).toJsonBuffer()
-                                );
-                    } else {
-                        logger.finer("No user was found");
-                        routingContext
-                                .response()
-                                .setStatusCode(401)
-                                .end();
-                    }
-                }).onFailure(t -> {
-                    logger.log(Level.SEVERE, "Error while logging in with email and password", t);
+                .onSuccess(userRecordOptional -> userRecordOptional.ifPresentOrElse(user -> {
+                    logger.finest("Found " + user);
                     routingContext
                             .response()
-                            .setStatusCode(500);
-                });
+                            .setStatusCode(200)
+                            .end(new UserDto(
+                                            user,
+                                            jwtAuth.generateToken(JsonObject.of("email", user.getEmail()))
+                                    ).toJsonBuffer()
+                            );
+                }, () -> {
+                    logger.finer("No user was found");
+                    routingContext
+                            .response()
+                            .setStatusCode(401)
+                            .end();
+                })).onFailure(routingContext::fail);
     }
 
     /**

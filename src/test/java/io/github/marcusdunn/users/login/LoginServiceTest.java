@@ -34,15 +34,18 @@ class LoginServiceTest extends AbstractDatabaseTest {
     void checkLoginWithMatchingUser(VertxTestContext testContext) {
         String email = "marcus.dunn@example.com";
         String password = "password123";
+        String username = "frosty";
         ReactiveFutureBridge.fetchOne(
                         dsl.insertInto(
                                         JUser.USER,
                                         JUser.USER.EMAIL,
-                                        JUser.USER.PASSWORD
+                                        JUser.USER.PASSWORD,
+                                        JUser.USER.USERNAME
                                 )
                                 .values(
                                         value(email, JUser.USER.EMAIL),
-                                        value(password, JUser.USER.PASSWORD)
+                                        value(password, JUser.USER.PASSWORD),
+                                        value(username, JUser.USER.USERNAME)
                                 )
                 )
                 .onComplete(testContext.succeeding(i -> loginService
