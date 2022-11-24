@@ -1,7 +1,7 @@
 package io.github.marcusdunn;
 
 import dagger.Component;
-import io.github.marcusdunn.users.login.UserModule;
+import io.github.marcusdunn.users.UsersModule;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
@@ -75,7 +75,7 @@ public class Main {
                 }).onFailure(t -> logger.log(Level.SEVERE, "Failed to create a routerBuilder from openapi spec.", t));
     }
 
-    @Component(modules = {VertxModule.class, UserModule.class, DatabaseModule.class, ConfigModule.class})
+    @Component(modules = {VertxModule.class, UsersModule.class, DatabaseModule.class, ConfigModule.class})
     @Singleton
     interface RealWorld {
         Main main();

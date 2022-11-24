@@ -1,7 +1,7 @@
 package io.github.marcusdunn;
 
 import dagger.Component;
-import io.github.marcusdunn.users.login.UserModule;
+import io.github.marcusdunn.users.UsersModule;
 import io.github.marcusdunn.users.login.LoginService;
 import io.r2dbc.spi.ConnectionFactory;
 import io.vertx.ext.web.client.WebClient;
@@ -16,7 +16,7 @@ public class AbstractIntegrationTest {
     public static final Main main = testApp.main();
     public static final WebClient webClient = testApp.webClient();
 
-    @Component(modules = {VertxModule.class, UserModule.class, TestDatabaseModule.class, ConfigModule.class})
+    @Component(modules = {VertxModule.class, UsersModule.class, TestDatabaseModule.class, ConfigModule.class})
     @Singleton
     interface TestApp {
         Main main();

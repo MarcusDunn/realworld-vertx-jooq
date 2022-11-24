@@ -7,6 +7,7 @@ import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.validation.RequestParameters;
 import io.vertx.ext.web.validation.ValidationHandler;
+
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,17 +25,6 @@ public class LoginOperationHandler implements OperationHandler {
         this.jwtAuth = jwtAuth;
     }
 
-    private static Request getRequest(RoutingContext routingContext) {
-        RequestParameters parameters = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
-        JsonObject jsonObject = parameters
-                .body()
-                .getJsonObject()
-                .getJsonObject("user");
-        String email = jsonObject.getString("email");
-        String password = jsonObject.getString("password");
-        return new Request(new Request.User(email, password));
-    }
-
     @Override
     public String operationName() {
         return "Login";
@@ -46,7 +36,11 @@ public class LoginOperationHandler implements OperationHandler {
     }
 
     private void handle(RoutingContext routingContext) {
-        Request request = getRequest(routingContext);
+        JsonObject jsonObject = routingContext
+                .<RequestParameters>get(ValidationHandler.REQUEST_CONTEXT_KEY)
+                .body()
+                .getJsonObject();
+        Request request = Request.fromJsonObject(jsonObject);
 
         loginService
                 .loginEmailPassword(request.user.email, request.user.password)
@@ -85,10 +79,23 @@ public class LoginOperationHandler implements OperationHandler {
             this.user = Objects.requireNonNull(user);
         }
 
+        static Request fromJsonObject(JsonObject jsonObject) {
+            Objects.requireNonNull(jsonObject, "jsonObject");
+            return new Request(User.fromJsonObject(jsonObject.getJsonObject("user")));
+        }
+
         private record User(String email, String password) {
             User(String email, String password) {
                 this.email = Objects.requireNonNull(email, "email");
                 this.password = Objects.requireNonNull(password, "password");
+            }
+
+            static User fromJsonObject(JsonObject jsonObject) {
+                Objects.requireNonNull(jsonObject, "jsonObject");
+                return new User(
+                        jsonObject.getString("email"),
+                        jsonObject.getString("password")
+                );
             }
         }
     }
