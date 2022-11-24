@@ -1,4 +1,4 @@
-package io.github.marcusdunn.user.login;
+package io.github.marcusdunn.users.login;
 
 import io.r2dbc.spi.ConnectionFactory;
 import io.vertx.core.Future;

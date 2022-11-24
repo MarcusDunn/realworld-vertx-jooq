@@ -1,7 +1,7 @@
 package io.github.marcusdunn;
 
 import dagger.Component;
-import io.github.marcusdunn.user.UserModule;
+import io.github.marcusdunn.users.login.UserModule;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;

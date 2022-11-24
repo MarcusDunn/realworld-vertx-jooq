@@ -1,4 +1,4 @@
-package io.github.marcusdunn.user.login;
+package io.github.marcusdunn.users.login;
 
 import io.github.marcusdunn.AbstractDatabaseTest;
 import io.vertx.core.CompositeFuture;

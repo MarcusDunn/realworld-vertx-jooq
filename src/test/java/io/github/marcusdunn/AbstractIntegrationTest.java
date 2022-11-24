@@ -1,8 +1,8 @@
 package io.github.marcusdunn;
 
 import dagger.Component;
-import io.github.marcusdunn.user.UserModule;
-import io.github.marcusdunn.user.login.LoginService;
+import io.github.marcusdunn.users.login.UserModule;
+import io.github.marcusdunn.users.login.LoginService;
 import io.r2dbc.spi.ConnectionFactory;
 import io.vertx.ext.web.client.WebClient;
 import javax.inject.Singleton;

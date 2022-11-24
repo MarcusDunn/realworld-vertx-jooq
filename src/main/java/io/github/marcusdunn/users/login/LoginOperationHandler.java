@@ -1,7 +1,6 @@
-package io.github.marcusdunn.user.login;
+package io.github.marcusdunn.users.login;
 
 import io.github.marcusdunn.OperationHandler;
-import io.github.marcusdunn.user.UserDto;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.jwt.JWTAuth;
