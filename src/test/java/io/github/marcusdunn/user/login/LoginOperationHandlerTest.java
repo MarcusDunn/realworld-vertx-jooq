@@ -7,7 +7,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+
 import java.util.concurrent.TimeUnit;
+
 import org.jooq.generated.tables.JUser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +25,6 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jooq.impl.DSL.value;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(VertxExtension.class)
 @Timeout(value = 2, timeUnit = TimeUnit.SECONDS)
@@ -42,7 +43,7 @@ class LoginOperationHandlerTest extends AbstractDatabaseTest {
                         ))
                 )
                 .onComplete(vertxTestContext.succeeding(response -> {
-                            vertxTestContext.verify(() -> assertEquals(401, response.statusCode()));
+                            vertxTestContext.verify(() -> assertThat(response, hasStatusCode(equalTo(401))));
                             server.close().onComplete(vertxTestContext.succeedingThenComplete());
                         }
                 ))));
@@ -56,7 +57,7 @@ class LoginOperationHandlerTest extends AbstractDatabaseTest {
                 .host("localhost")
                 .send()
                 .onComplete(vertxTestContext.succeeding((response) -> {
-                    vertxTestContext.verify(() -> assertEquals(400, response.statusCode()));
+                    vertxTestContext.verify(() -> assertThat(response, hasStatusCode(equalTo(400))));
                     server.close().onComplete(vertxTestContext.succeedingThenComplete());
                 }))));
     }
@@ -90,16 +91,16 @@ class LoginOperationHandlerTest extends AbstractDatabaseTest {
                                         ))
                                 )
                                 .onComplete(vertxTestContext.succeeding((response) -> {
-                                    vertxTestContext.verify(() -> assertThat(response, hasStatusCode(equalTo(200))));
-                                    vertxTestContext.verify(() -> assertThat(response, hasBody(withJsonObject(
-                                            allOf(
+                                    vertxTestContext.verify(() -> assertThat(response, allOf(
+                                            hasStatusCode(equalTo(200)),
+                                            hasBody(withJsonObject(allOf(
                                                     hasStringField("email", equalTo(email)),
                                                     hasStringField("username", equalTo(email)),
                                                     hasStringField("token", notNullValue()),
                                                     hasStringField("image", nullValue()),
-                                                    hasStringField("bio", nullValue())
-                                            )
-                                    ))));
+                                                    hasStringField("bio", nullValue()))
+                                            )))
+                                    ));
                                     server.close().onComplete(vertxTestContext.succeedingThenComplete());
                                 }))
                 ));
