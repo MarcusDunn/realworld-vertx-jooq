@@ -1,6 +1,8 @@
-package io.github.marcusdunn.users;
+package io.github.marcusdunn.users.signup;
 
+import io.github.marcusdunn.users.UserDto;
 import io.vertx.core.Handler;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.RoutingContext;
@@ -57,6 +59,10 @@ public class SignupHandler implements Handler<RoutingContext> {
         public JsonObject toJsonObject() {
             return JsonObject.of()
                     .put("user", user.toJsonObject());
+        }
+
+        public Buffer toJsonBuffer() {
+            return toJsonObject().toBuffer();
         }
 
         public record User(String email, String username, String password) {

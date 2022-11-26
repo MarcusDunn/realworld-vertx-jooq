@@ -26,10 +26,24 @@
             </column>
         </addColumn>
     </changeSet>
-    <changeSet author="user" id="00000000003 add user username column">
+    <changeSet author="user" id="00000000004 add user username column">
         <addColumn tableName="user">
             <column type="TEXT" name="username">
                 <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="user" id="00000000005 add user bio column">
+        <addColumn tableName="user">
+            <column type="TEXT" name="bio">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="user" id="00000000006 add user image">
+        <addColumn tableName="user">
+            <column type="TEXT" name="image">
+                <constraints nullable="true"/>
             </column>
         </addColumn>
     </changeSet>

@@ -1,6 +1,7 @@
-package io.github.marcusdunn.users;
+package io.github.marcusdunn.users.current;
 
 import io.github.marcusdunn.ReactiveFutureBridge;
+import io.github.marcusdunn.users.AbstractDatabaseService;
 import io.r2dbc.spi.ConnectionFactory;
 import io.vertx.core.Future;
 import org.jooq.generated.tables.JUser;

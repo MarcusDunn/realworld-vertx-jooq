@@ -1,4 +1,4 @@
-package io.github.marcusdunn.users;
+package io.github.marcusdunn.users.signup;
 
 import io.github.marcusdunn.AbstractDatabaseTest;
 import io.vertx.core.json.JsonObject;

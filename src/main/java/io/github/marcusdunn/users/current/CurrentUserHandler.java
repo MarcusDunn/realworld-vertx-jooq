@@ -1,5 +1,6 @@
-package io.github.marcusdunn.users;
+package io.github.marcusdunn.users.current;
 
+import io.github.marcusdunn.users.UserDto;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 

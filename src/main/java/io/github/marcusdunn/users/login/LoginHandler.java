@@ -57,8 +57,8 @@ public class LoginHandler implements Handler<RoutingContext> {
     /**
      * see <a href="https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#authentication">Authentication</a>
      */
-    private record Request(User user) {
-        Request(User user) {
+    public record Request(User user) {
+        public Request(User user) {
             this.user = Objects.requireNonNull(user);
         }
 
@@ -67,8 +67,8 @@ public class LoginHandler implements Handler<RoutingContext> {
             return new Request(User.fromJsonObject(jsonObject.getJsonObject("user")));
         }
 
-        private record User(String email, String password) {
-            User(String email, String password) {
+        public record User(String email, String password) {
+            public User(String email, String password) {
                 this.email = Objects.requireNonNull(email, "email");
                 this.password = Objects.requireNonNull(password, "password");
             }
