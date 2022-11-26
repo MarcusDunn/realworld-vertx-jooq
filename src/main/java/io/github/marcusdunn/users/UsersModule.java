@@ -2,20 +2,29 @@ package io.github.marcusdunn.users;
 
 import dagger.Binds;
 import dagger.Module;
-import dagger.multibindings.IntoSet;
-import io.github.marcusdunn.OperationHandler;
-import io.github.marcusdunn.users.login.LoginOperationHandler;
+import dagger.multibindings.IntoMap;
+import dagger.multibindings.StringKey;
+import io.github.marcusdunn.users.login.LoginHandler;
+import io.vertx.core.Handler;
+import io.vertx.ext.web.RoutingContext;
 
 /**
  * contains the classes used in the sub-route /users
  */
 @Module
 public abstract class UsersModule {
-    @IntoSet
+    @IntoMap
+    @StringKey("Login")
     @Binds
-    abstract OperationHandler loginOperationHandler(LoginOperationHandler loginOperationHandler);
+    abstract Handler<RoutingContext> loginHandler(LoginHandler loginHandler);
 
-    @IntoSet
+    @IntoMap
+    @StringKey("CreateUser")
     @Binds
-    abstract OperationHandler SignupOperationHandler(SignupOperationHandler loginOperationHandler);
+    abstract Handler<RoutingContext> signupHandler(SignupHandler signupHandler);
+
+    @IntoMap
+    @StringKey("GetCurrentUser")
+    @Binds
+    abstract Handler<RoutingContext> currentUserHandler(CurrentUserHandler currentUserHandler);
 }

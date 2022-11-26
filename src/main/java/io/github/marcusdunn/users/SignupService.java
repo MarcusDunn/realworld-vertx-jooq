@@ -6,24 +6,22 @@ import io.vertx.core.Future;
 import org.jooq.Record1;
 import org.jooq.generated.tables.JUser;
 import org.jooq.generated.tables.records.JUserRecord;
-import org.jooq.impl.DSL;
 
 import javax.inject.Inject;
 import java.util.Optional;
 
 import static org.jooq.impl.DSL.value;
 
-public class SignupService {
-    private final ConnectionFactory connectionFactory;
+public class SignupService extends AbstractDatabaseService {
 
     @Inject
     public SignupService(ConnectionFactory connectionFactory) {
-        this.connectionFactory = connectionFactory;
+        super(connectionFactory);
     }
 
     public Future<Optional<JUserRecord>> signup(String username, String email, String password) {
         return ReactiveFutureBridge.fetchOne(
-                        DSL.using(connectionFactory)
+                        dsl()
                                 .insertInto(JUser.USER,
                                         JUser.USER.EMAIL,
                                         JUser.USER.PASSWORD,

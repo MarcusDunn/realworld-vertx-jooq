@@ -609,6 +609,7 @@ paths:
     get:
       summary: Get tags
       description: Get tags. Auth not required
+      operationId: GetTags
       responses:
         200:
           description: OK

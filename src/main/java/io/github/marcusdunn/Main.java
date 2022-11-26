@@ -3,23 +3,27 @@ package io.github.marcusdunn;
 import dagger.Component;
 import io.github.marcusdunn.users.UsersModule;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.AuthenticationHandler;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.ext.web.openapi.RouterBuilderOptions;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.Map;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Main {
     private final static Logger logger = Logger.getLogger(Main.class.getName());
     private final Vertx vertx;
-    private final Set<OperationHandler> operationHandlers;
+    private final Map<String, Handler<RoutingContext>> operationHandlers;
     private final BodyHandler bodyHandler;
     private final AuthenticationHandler authenticationHandler;
     private final HttpServerOptions httpServerOptions;
@@ -28,7 +32,7 @@ public class Main {
     @Inject
     public Main(
             Vertx vertx,
-            Set<OperationHandler> operationHandlers,
+            Map<String, Handler<RoutingContext>> operationHandlers,
             BodyHandler bodyHandler,
             AuthenticationHandler authenticationHandler,
             HttpServerOptions httpServerOptions,
@@ -43,13 +47,14 @@ public class Main {
     }
 
     public static void main(String[] args) {
+        logger.info("Starting.");
         final var startMillis = System.currentTimeMillis();
         DaggerMain_RealWorld
                 .create()
                 .main()
                 .run()
                 .onSuccess(httpServer ->
-                        logger.info(() -> "started in " + (System.currentTimeMillis() - startMillis) + "ms")
+                        logger.info(() -> "Started in " + (System.currentTimeMillis() - startMillis) + "ms.")
                 );
     }
 
@@ -57,17 +62,20 @@ public class Main {
         return RouterBuilder
                 .create(vertx, "openapi.yml")
                 .flatMap(builder -> {
-                    builder.setOptions(routerBuilderOptions);
-                    operationHandlers.forEach(operationHandler -> {
-                        final var operationName = operationHandler.operationName();
-                        logger.fine(() -> "Registering " + operationName);
-                        builder.operation(operationName).handler(operationHandler.handler());
-                    });
-                    builder.rootHandler(bodyHandler);
-                    logger.fine(() -> "Registering Security handler Token");
-                    builder.securityHandler("Token", authenticationHandler);
-                    logger.fine(() -> "Creating httpServer");
-                    return vertx.createHttpServer(httpServerOptions)
+                    builder
+                            .setOptions(routerBuilderOptions)
+                            .rootHandler(bodyHandler)
+                            .securityHandler("Token", authenticationHandler)
+                            .operations()
+                            .forEach(operation ->
+                                    Optional.ofNullable(operationHandlers.get(operation.getOperationId()))
+                                            .ifPresentOrElse(handler -> {
+                                                logger.info("registering " + handler.getClass().getSimpleName() + " for operation: " + operation.getOperationId());
+                                                operation.handler(handler);
+                                            }, () -> logger.warning("No handler for operation: " + operation.getOperationId()))
+                            );
+                    return vertx
+                            .createHttpServer(httpServerOptions)
                             .requestHandler(builder.createRouter())
                             .listen()
                             .onSuccess(httpServer -> logger.info(() -> "Server listening on " + httpServer.actualPort()))

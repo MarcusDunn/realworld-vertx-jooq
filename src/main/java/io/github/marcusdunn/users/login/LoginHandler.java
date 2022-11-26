@@ -1,6 +1,6 @@
 package io.github.marcusdunn.users.login;
 
-import io.github.marcusdunn.OperationHandler;
+import io.github.marcusdunn.users.UserDto;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.jwt.JWTAuth;
@@ -13,28 +13,20 @@ import java.util.Objects;
 import java.util.logging.Logger;
 
 
-public class LoginOperationHandler implements OperationHandler {
-    private static final Logger logger = Logger.getLogger(LoginOperationHandler.class.getName());
+public class LoginHandler implements Handler<RoutingContext> {
+    private static final Logger logger = Logger.getLogger(LoginHandler.class.getName());
     private final LoginService loginService;
     private final JWTAuth jwtAuth;
 
     @Inject
-    public LoginOperationHandler(LoginService loginService, JWTAuth jwtAuth) {
+    public LoginHandler(LoginService loginService, JWTAuth jwtAuth) {
         this.loginService = loginService;
         this.jwtAuth = jwtAuth;
     }
 
-    @Override
-    public String operationName() {
-        return "Login";
-    }
 
     @Override
-    public Handler<RoutingContext> handler() {
-        return this::handle;
-    }
-
-    private void handle(RoutingContext routingContext) {
+    public void handle(RoutingContext routingContext) {
         JsonObject jsonObject = routingContext
                 .<RequestParameters>get(ValidationHandler.REQUEST_CONTEXT_KEY)
                 .body()
@@ -50,7 +42,7 @@ public class LoginOperationHandler implements OperationHandler {
                             .setStatusCode(200)
                             .end(new UserDto(
                                             user,
-                                            jwtAuth.generateToken(JsonObject.of("email", user.getEmail()))
+                                            jwtAuth.generateToken(JsonObject.of("id", user.getId()))
                                     ).toJsonBuffer()
                             );
                 }, () -> {

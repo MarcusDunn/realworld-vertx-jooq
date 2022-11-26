@@ -1,7 +1,6 @@
 package io.github.marcusdunn.users.login;
 
 import io.github.marcusdunn.AbstractDatabaseTest;
-import io.github.marcusdunn.ReactiveFutureBridge;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -11,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.concurrent.TimeUnit;
 
+import static io.github.marcusdunn.ReactiveFutureBridge.fetchOne;
 import static io.github.marcusdunn.matcher.ApprovalMatcher.isApproved;
 import static io.github.marcusdunn.matcher.EmptyValueMatcher.isEmpty;
 import static io.github.marcusdunn.matcher.PresentValueMatcher.hasPresentValue;
@@ -35,19 +35,19 @@ class LoginServiceTest extends AbstractDatabaseTest {
         String email = "marcus.dunn@example.com";
         String password = "password123";
         String username = "frosty";
-        ReactiveFutureBridge.fetchOne(
-                        dsl.insertInto(
-                                        JUser.USER,
-                                        JUser.USER.EMAIL,
-                                        JUser.USER.PASSWORD,
-                                        JUser.USER.USERNAME
-                                )
-                                .values(
-                                        value(email, JUser.USER.EMAIL),
-                                        value(password, JUser.USER.PASSWORD),
-                                        value(username, JUser.USER.USERNAME)
-                                )
-                )
+        fetchOne(
+                dsl.insertInto(
+                                JUser.USER,
+                                JUser.USER.EMAIL,
+                                JUser.USER.PASSWORD,
+                                JUser.USER.USERNAME
+                        )
+                        .values(
+                                value(email, JUser.USER.EMAIL),
+                                value(password, JUser.USER.PASSWORD),
+                                value(username, JUser.USER.USERNAME)
+                        )
+        )
                 .onComplete(testContext.succeeding(i -> loginService
                         .loginEmailPassword(email, password)
                         .onComplete(testContext.succeeding(result -> testContext

@@ -7,28 +7,24 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-
-import java.util.concurrent.TimeUnit;
-
 import org.jooq.generated.tables.JUser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.util.concurrent.TimeUnit;
+
+import static io.github.marcusdunn.ReactiveFutureBridge.fetchOne;
 import static io.github.marcusdunn.matcher.BodyMatcher.hasBody;
 import static io.github.marcusdunn.matcher.JsonBodyMatcher.withJsonObject;
 import static io.github.marcusdunn.matcher.JsonStringFieldMatcher.hasStringField;
-import static io.github.marcusdunn.ReactiveFutureBridge.fetchOne;
 import static io.github.marcusdunn.matcher.StatusCodeMatcher.hasStatusCode;
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jooq.impl.DSL.value;
 
 @ExtendWith(VertxExtension.class)
 @Timeout(value = 2, timeUnit = TimeUnit.SECONDS)
-class LoginOperationHandlerTest extends AbstractDatabaseTest {
+class LoginHandlerTest extends AbstractDatabaseTest {
 
     @Test
     void testLoginWithNoSuchUser(VertxTestContext vertxTestContext) {

@@ -1,4 +1,4 @@
-package io.github.marcusdunn.users.login;
+package io.github.marcusdunn.users;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
