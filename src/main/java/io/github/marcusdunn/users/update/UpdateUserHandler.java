@@ -33,11 +33,7 @@ public class UpdateUserHandler extends AbstractDatabaseService implements Handle
     public void handle(RoutingContext event) {
         int id = event.user().principal().getInteger("id");
         JsonObject user = event.body().asJsonObject().getJsonObject("user");
-        String username = "username";
-        TableField<JUserRecord, String> username1 = JUser.USER.USERNAME;
-        Field<String> value = user.containsKey(username) ? coalesce(value(user.getString(username)), username1) : username1;
         fetchOne(dsl().update(JUser.USER)
-                .set(username1, value)
                 .set(JUser.USER.EMAIL, getUpdateFromJsonNotNull(user, "email", JUser.USER.EMAIL))
                 .set(JUser.USER.USERNAME, getUpdateFromJsonNotNull(user, "username", JUser.USER.USERNAME))
                 .set(JUser.USER.PASSWORD, getUpdateFromJsonNotNull(user, "email", JUser.USER.PASSWORD))
