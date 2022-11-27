@@ -75,6 +75,7 @@ tasks.withType<Test> {
 }
 
 tasks.withType<JavaCompile>() {
+    dependsOn(tasks.withType(JooqGenerate::class))
     options.compilerArgs.add("--enable-preview")
 }
 

@@ -14,10 +14,10 @@ import org.postgresql.Driver;
 
 import javax.inject.Singleton;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.Properties;
 
 import static io.r2dbc.spi.ConnectionFactoryOptions.*;
-import static java.text.MessageFormat.format;
 
 @Module
 public class DatabaseModule {
@@ -55,11 +55,11 @@ public class DatabaseModule {
     @Provides
     @Singleton
     Liquibase liquibase(Configuration configuration) {
-        final String url = format(
+        final String url = MessageFormat.format(
                 "jdbc:{0}://{1}:{2}/{3}",
                 configuration.getString(DRIVER_KEY, DEFAULT_DRIVER),
                 configuration.getString(HOST_KEY, DEFAULT_HOST),
-                configuration.getInt(PORT_KEY, DEFAULT_PORT),
+                Integer.toString(configuration.getInt(PORT_KEY, DEFAULT_PORT)),
                 configuration.getString(DATABASE_KEY, DEFAULT_DATABASE)
         );
         final var properties = new Properties();
@@ -72,7 +72,7 @@ public class DatabaseModule {
                     new JdbcConnection(new Driver().connect(url, properties))
             );
         } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("failed to connect to: " + url, e);
         }
     }
 }

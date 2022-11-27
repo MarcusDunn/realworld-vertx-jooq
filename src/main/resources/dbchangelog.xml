@@ -47,7 +47,7 @@
             </column>
         </addColumn>
     </changeSet>
-    <changeSet author="marcus" id="00000000007 add user username unique constraint">
+    <changeSet author="marcus" id="00000000007 add user username unique constraint" failOnError="false">
         <addUniqueConstraint tableName="user" columnNames="username" constraintName="user_unique_username"/>
     </changeSet>
 </databaseChangeLog>

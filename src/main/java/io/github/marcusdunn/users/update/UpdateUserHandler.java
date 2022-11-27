@@ -51,11 +51,11 @@ public class UpdateUserHandler extends AbstractDatabaseService implements Handle
                 );
     }
 
-    Field<String> getUpdateFromJsonNotNull(JsonObject user, String key, TableField<JUserRecord, String> field) {
+    private static Field<String> getUpdateFromJsonNotNull(JsonObject user, String key, TableField<JUserRecord, String> field) {
         return user.containsKey(key) ? coalesce(value(user.getString(key)), field) : field;
     }
 
-    Field<String> getUpdateFromJson(JsonObject user, String key, TableField<JUserRecord, String> field) {
+    private static Field<String> getUpdateFromJson(JsonObject user, String key, TableField<JUserRecord, String> field) {
         return user.containsKey(key) ? value(user.getString(key)) : field;
     }
 }
