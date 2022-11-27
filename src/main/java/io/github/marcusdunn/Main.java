@@ -73,7 +73,6 @@ public class Main {
         Future<Object> liquibaseUpdate = vertx.executeBlocking((promise) -> {
             try {
                 liquibase.update();
-                liquibase.close();
                 promise.complete();
             } catch (LiquibaseException e) {
                 promise.fail(e);

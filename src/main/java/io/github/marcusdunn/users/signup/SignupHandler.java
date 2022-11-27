@@ -1,12 +1,14 @@
 package io.github.marcusdunn.users.signup;
 
 import io.github.marcusdunn.users.UserDto;
+import io.r2dbc.spi.R2dbcDataIntegrityViolationException;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.validation.RequestParameters;
 import io.vertx.ext.web.validation.ValidationHandler;
+import org.jooq.exception.DataAccessException;
 
 import javax.inject.Inject;
 import java.util.Objects;
@@ -40,7 +42,22 @@ public class SignupHandler implements Handler<RoutingContext> {
                             .setStatusCode(200)
                             .send(new UserDto(user, jwtAuth.generateToken(JsonObject.of("id", user.getId()))).toJsonBuffer());
                 }, () -> routingContext.fail(500)))
-                .onFailure(routingContext::fail);
+                .onFailure(throwable -> {
+                    if (isUsernameUniquenessViolation(throwable)) {
+                        routingContext
+                                .response()
+                                .setStatusCode(403)
+                                .end(JsonObject.of("error", "Username already taken.").toBuffer());
+                    } else {
+                        routingContext.fail(throwable);
+                    }
+                });
+    }
+
+    private static boolean isUsernameUniquenessViolation(Throwable throwable) {
+        return throwable instanceof DataAccessException dataAccessException &&
+                dataAccessException.getCause() instanceof R2dbcDataIntegrityViolationException r2dbcDataIntegrityViolationException &&
+                r2dbcDataIntegrityViolationException.getMessage().matches(".*duplicate key value violates unique constraint \"user_unique_username\".*");
     }
 
     /**

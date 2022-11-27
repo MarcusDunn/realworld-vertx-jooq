@@ -67,4 +67,24 @@ class SignupHandlerTest extends AbstractDatabaseTest {
                             server.close().onComplete(testContext.succeedingThenComplete());
                         }))))));
     }
+
+    @Test
+    void checkCannotCreateDuplicateUsers(VertxTestContext testContext) {
+        String email = "example@example.com";
+        String password = "password123";
+        String username = "frosty";
+        main.run().onComplete(testContext.succeeding(server -> webClient
+                .post("/users")
+                .port(server.actualPort())
+                .host("localhost")
+                .sendJsonObject(new SignupHandler.Request(new SignupHandler.Request.User(email, username, password)).toJsonObject())
+                .flatMap(signupResponse -> webClient.post("/users")
+                        .port(server.actualPort())
+                        .host("localhost")
+                        .sendJsonObject(new SignupHandler.Request(new SignupHandler.Request.User(email + "12", username, password + "1")).toJsonObject()))
+                .onComplete(testContext.succeeding(duplicateSignupResponse -> {
+                    testContext.verify(() -> assertThat(duplicateSignupResponse, hasStatusCode(equalTo(403))));
+                    server.close().onComplete(testContext.succeedingThenComplete());
+                }))));
+    }
 }
