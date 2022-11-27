@@ -15,7 +15,6 @@ public class AbstractIntegrationTest {
     public static final LoginService loginService = testApp.loginService();
     public static final Main main = testApp.main();
     public static final WebClient webClient = testApp.webClient();
-
     public static final Liquibase liquibase = testApp.liquibase();
 
     @Component(modules = {VertxModule.class, UsersModule.class, TestDatabaseModule.class, ConfigModule.class})

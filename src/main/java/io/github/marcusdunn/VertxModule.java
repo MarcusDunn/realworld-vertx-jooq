@@ -14,11 +14,14 @@ import io.vertx.ext.web.handler.AuthenticationHandler;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.JWTAuthHandler;
 import io.vertx.ext.web.openapi.RouterBuilderOptions;
-import javax.inject.Singleton;
 import org.apache.commons.configuration2.Configuration;
+
+import javax.inject.Singleton;
 
 @Module
 public class VertxModule {
+    private static String PORT_KEY = "PORT";
+    private static int DEFAULT_PORT = 8080;
     @Provides
     @Singleton
     static Vertx vertx(VertxOptions vertxOptions) {
@@ -38,7 +41,7 @@ public class VertxModule {
     @Provides
     static HttpServerOptions httpServerOptions(Configuration configuration) {
         return new HttpServerOptions()
-                .setPort(configuration.getInt("PORT", 8080));
+                .setPort(configuration.getInt(PORT_KEY, DEFAULT_PORT));
     }
 
     @Provides

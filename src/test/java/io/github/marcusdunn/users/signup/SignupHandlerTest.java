@@ -2,10 +2,13 @@ package io.github.marcusdunn.users.signup;
 
 import io.github.marcusdunn.AbstractDatabaseTest;
 import io.vertx.core.json.JsonObject;
+import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.util.concurrent.TimeUnit;
 
 import static io.github.marcusdunn.matcher.BodyMatcher.hasBody;
 import static io.github.marcusdunn.matcher.JsonBodyMatcher.withJsonObject;
@@ -16,6 +19,7 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.equalTo;
 
 @ExtendWith(VertxExtension.class)
+@Timeout(value = 2, timeUnit = TimeUnit.SECONDS)
 class SignupHandlerTest extends AbstractDatabaseTest {
     @Test
     void checkSignupNewUser(VertxTestContext testContext) {

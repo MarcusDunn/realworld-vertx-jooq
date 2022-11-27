@@ -2,10 +2,13 @@ package io.github.marcusdunn.users.current;
 
 import io.github.marcusdunn.AbstractDatabaseTest;
 import io.github.marcusdunn.users.signup.SignupHandler;
+import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.util.concurrent.TimeUnit;
 
 import static io.github.marcusdunn.matcher.BodyMatcher.hasBody;
 import static io.github.marcusdunn.matcher.JsonBodyMatcher.withJsonObject;
@@ -15,6 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 @ExtendWith(VertxExtension.class)
+@Timeout(value = 2, timeUnit = TimeUnit.SECONDS)
 class CurrentUserHandlerTest extends AbstractDatabaseTest {
     @Test
     void testBadRequestWhenNoLogin(VertxTestContext testContext) {
